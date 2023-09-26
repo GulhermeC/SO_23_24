@@ -1,0 +1,82 @@
+fork1
+    Execution:
+        Before the fork:
+        PID = 3905, PPID = 3122
+        After the fork:
+        PID = 3905, PPID = 3122
+        After the fork:
+        PID = 3906, PPID = 3905
+        Was I printed by the parent or by the child process? How can I know it?
+        Was I printed by the parent or by the child process? How can I know it?
+  
+    man fork:
+        fork - create a child process
+    man getpid:
+        getpid  - get process identification
+    man getppid:
+        getppid - get parent process identification
+
+    change bwRandomDelay(0, 100000) -> bwRandomDelay(0, 2000);
+
+    Execution:
+        Before the fork:
+        PID = 3996, PPID = 3122
+        After the fork:
+        PID = 3996, PPID = 3122
+        After the fork:
+        Was I printed by the parent or by the child process? How can I know it?
+        PID = 3997, PPID = 3996
+        Was I printed by the parent or by the child process? How can I know it?
+
+fork2
+    Execution:
+        Before the fork:
+        PID = 4020, PPID = 3122
+        After the fork:
+        PID = 4020, PPID = 3122
+        After the fork:
+        PID = 4021, PPID = 4020
+        [ret = 4021] Was I printed by the parent or by the child process? How can I know it?
+        [ret = 0] Was I printed by the parent or by the child process? How can I know it?
+    fork() = 0 => child process 
+    so if ret = fork() and ret = 0 means its the child process
+
+fork3
+    Execution:
+        Before the fork:
+        PID = 4276, PPID = 3122.
+        I'm the parent: PID = 4276, PPID = 3122
+        I'm the child: PID = 4277, PPID = 4276
+
+fork4
+    Execution:
+        Before the fork: PID = 4303, PPID = 3122
+        I'm the parent: PID = 4303, PPID = 3122
+        I'm the child: PID = 4304, PPID = 4303
+        I'm the child: PID = 4304, PPID = 4303
+    man execl:
+        execl, execlp, execle, execv, execvp, execvpe - execute a file
+    message does not show up because the code after the execl is changed for the code of the child process launched wiht the command,
+     message will show up in case the file that is being executed does not exist
+    
+    man 2 wait:
+        wait, waitpid, waitid - wait for process to change state
+
+sig1
+    Execution:
+        PID = 7163
+        00000029 
+    Displays PID number and counts until it reachs 30
+    man 2 kill:
+        kill - send signal to a process
+
+sig2
+    Execution:
+        PID = 7362
+        00000029 ^C
+        Stay calm, I haven't reached 50 yet!
+        00000049
+    man 2 sigaction:
+        sigaction, rt_sigaction - examine and change a signal action
+
+
