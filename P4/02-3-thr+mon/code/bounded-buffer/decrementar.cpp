@@ -17,7 +17,6 @@ int num = 0;
 
 void childProc(uint32_t id)
 {
-    //printf("My id is %d \n", id);
     while(num != 1)
     {
         mutex_lock(&acc);
@@ -35,7 +34,7 @@ void childProc(uint32_t id)
                 cond_wait(&vc[id],&acc);
             }
         }
-        //printf("wait");
+
         if(num == 1)
         {
             thread_exit(NULL);
@@ -46,16 +45,6 @@ void childProc(uint32_t id)
         u_int32_t broadcast = (id+1)%2;
         cond_broadcast(&vc[broadcast]);
         
-        //check fifo-safe
-        /*
-        mutex
-        while(a)
-        {
-            cond wait
-        }
-        cond broadcast
-        mutex unlock
-        */
         mutex_unlock(&acc);
     }
     thread_exit(NULL);
@@ -75,7 +64,7 @@ int main(int argc, char *argv[])
     /* Variables */
     uint32_t nc = 2;
     int input;
-    //int* x = (int*)malloc(sizeof(int));
+    
 
     printf("Parent says: \n  Insert number: ");
     scanf("%d",&input);
@@ -86,6 +75,7 @@ int main(int argc, char *argv[])
         scanf("%d",&input);
     }
     num = input;
+
     /* init mutex and condition variables */
     cond_init(&vc[0], NULL);
     cond_init(&vc[1], NULL);
@@ -103,8 +93,10 @@ int main(int argc, char *argv[])
     for(uint32_t i = 0; i < nc; i++)
     {
         thread_join(pthr[i], NULL);
+        printf("Child %u finished\n", i+1);
     }
 
+    /* destroy mutex and condition variables */
     cond_destroy(&vc[0]);
     cond_destroy(&vc[1]);
     mutex_destroy(&acc);
