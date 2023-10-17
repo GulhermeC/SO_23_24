@@ -21,6 +21,9 @@ int main(int argc, char *argv[]){
     uint32_t shmid = pshmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | 0600);
     uint32_t  *sam = (uint32_t  *)pshmat(shmid, NULL, 0);
     uint32_t sem = psemget(IPC_PRIVATE, 2, IPC_CREAT | 0600);
+    psem_up(sem, 0);
+    
+
 
     *sam = 1;
     uint32_t  x;
@@ -35,9 +38,7 @@ int main(int argc, char *argv[]){
         }
     *sam = x;
     printf("Inserted %d\n",*sam);
-    //psem_up(sem, 0);
     
-
     /* launch child process */
     uint32_t nc = 2;
     uint32_t next;
@@ -46,23 +47,31 @@ int main(int argc, char *argv[]){
     {
         if((cpid[i] = pfork()) == 0)
         {
-            next = (i+1)%2;
-            psem_down(sem, i);
-            if(*sam != 1)
+            while(*sam != 1)
             {
-                *sam = *sam - 1;
-                printf("Child %d with PID %d Minus ONE: %d", i, getpid(), *sam);
+                next = (i+1)%2;
+                psem_down(sem, i%2);
+                if(*sam != 1)
+                {
+                    *sam = *sam - 1;
+                    printf("Child %d with PID %d Minus ONE: %d\n", i+1, getpid(), *sam);
+                }
+                else
+                {
+                    exit(EXIT_SUCCESS);
+                }
+                psem_up(sem, next);
             }
-            else
-            {
-                exit(EXIT_SUCCESS);
-            }
-            psem_up(sem, next);
+            exit(EXIT_SUCCESS);
         }
     }
 
-    pwait(NULL);
-    printf("Final: %d", *sam);
+    /* Wait for Childs to finish */
+    for (uint32_t i = 0; i < nc; i++)
+    {
+        waitpid(cpid[i], NULL, 0);
+        printf("Child %u finished\n", i+1);
+    }
 
     return 0;
 }

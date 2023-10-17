@@ -9,41 +9,72 @@
 
 #include "thread.h"
 
+bool isPar();
 
-struct data
-{
-    int num;
-    pthread_mutex_t acc;
-};
+pthread_mutex_t acc;
+pthread_cond_t vc[2];
+int num = 0;
 
-void childProc(int numb, pthread_mutex_t acc)
+void childProc(uint32_t id)
 {
-    mutex_lock(&acc);
-    //check fifo-safe
-    if(numb == 1)
+    //printf("My id is %d \n", id);
+    while(num != 1)
     {
-        thread_exit(NULL);
-    }else{
-        numb = numb - 1;
+        mutex_lock(&acc);
+        
+        if(id%2 == 0)
+        {
+            while(!isPar())
+            {
+                cond_wait(&vc[id],&acc);
+            }
+        }
+        else{
+            while(isPar())
+            {
+                cond_wait(&vc[id],&acc);
+            }
+        }
+        //printf("wait");
+        if(num == 1)
+        {
+            thread_exit(NULL);
+        }else{
+            num = num - 1;
+        }
+        printf("ID %d: number -> %d\n", id+1, num);
+        u_int32_t broadcast = (id+1)%2;
+        cond_broadcast(&vc[broadcast]);
+        
+        //check fifo-safe
+        /*
+        mutex
+        while(a)
+        {
+            cond wait
+        }
+        cond broadcast
+        mutex unlock
+        */
+        mutex_unlock(&acc);
     }
-    printf("PID %d: number -> %d\n", getpid(), numb);
-    mutex_unlock(&acc);
+    thread_exit(NULL);
 }
 
 void *childThread(void *arg) 
 {
-    data *all = (data*)arg; 
-    childProc(all-> num, all->acc);
+    uint32_t *id = (uint32_t*)arg; 
+    childProc(*id);
     return NULL;
 }
+
+
 
 int main(int argc, char *argv[])
 {
     /* Variables */
     uint32_t nc = 2;
     int input;
-    data *sum;
-    sum = (data*)malloc(sizeof(data));
     //int* x = (int*)malloc(sizeof(int));
 
     printf("Parent says: \n  Insert number: ");
@@ -54,16 +85,19 @@ int main(int argc, char *argv[])
         printf("\nParent says: \n  Insert number: ");
         scanf("%d",&input);
     }
+    num = input;
+    /* init mutex and condition variables */
+    cond_init(&vc[0], NULL);
+    cond_init(&vc[1], NULL);
+    mutex_init(&acc, NULL);
 
-    pthread_mutex_t access;
+    int id[2] = {0, 1};
+    int* point = id;
 
-    mutex_init(&access, NULL);
-    *sum = {input, access};
-    
     pthread_t pthr[nc];
     for(uint32_t i = 0; i < nc; i++)
     {
-        thread_create(&pthr[i], NULL, childThread, sum);
+        thread_create(&pthr[i], NULL, childThread, point+i);
     }
     
     for(uint32_t i = 0; i < nc; i++)
@@ -71,7 +105,19 @@ int main(int argc, char *argv[])
         thread_join(pthr[i], NULL);
     }
 
-    mutex_destroy(&access);
+    cond_destroy(&vc[0]);
+    cond_destroy(&vc[1]);
+    mutex_destroy(&acc);
 
     return 0;
+}
+
+
+bool isPar()
+{
+    if(num%2 == 0)
+    {
+        return true;
+    }
+    return false;
 }

@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wfatal-errors -ggdb -pthread
 
-TARGETS = bb-unsafe bb-safe counter counterSem
+TARGETS = bb-unsafe bb-safe counter bb-counterSem
 
 .PHONY:	clean cleanall
 
@@ -13,7 +13,7 @@ bb-unsafe: main.cpp bwdelay.cpp fifo-unsafe.cpp process.cpp utils.cpp
 bb-safe: main.cpp bwdelay.cpp fifo-safe.cpp process.cpp utils.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-bb-counterSem: main.cpp bwdelay.cpp fifo-safe.cpp process.cpp utils.cpp
+bb-counterSem: counterSem.cpp process.cpp utils.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)	
 
 clean:
