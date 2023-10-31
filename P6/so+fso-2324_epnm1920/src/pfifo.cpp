@@ -89,8 +89,8 @@ int retrieve_pfifo(PriorityFIFO* pfifo)
 
    /* lock access to fifo */
    mutex_lock(&pfifo->access);
-
-   /* wait until fifo is not full */
+   
+   /* wait until fifo is not empty */
    while (empty_pfifo(pfifo)) 
    {
       cond_wait(&pfifo->notEmpty, &pfifo->access);
