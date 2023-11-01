@@ -98,31 +98,13 @@ void init_simulation(int np)
    init_pfifo(&hd->doctor_queue);
 
    /* init mutex and condition variables */
-
-   int idp[npatients];
-   int idn[nnurses];
-   int idd[ndoctors];
    
    for(int i = 0; i < npatients; i++)
    {
-      idp[i] = i;
-      thread_create(&pthr[i], NULL, patientThread, &idp[i]);
       mutex_init(&hd->all_patients[i].access, NULL);
+      cond_init(&hd->all_patients[i].p_ready,NULL);
    }
 
-   for(int i = 0; i < nnurses; i++)
-   {
-      idn[i] = i;
-      insert_pfifo(&hd->triage_queue, DUMMY_ID, 16);
-      thread_create(&nthr[i], NULL, nurseThread, &idn[i]);
-   }
-
-   for(int i = 0; i < ndoctors; i++)
-   {
-      idd[i] = i;
-      insert_pfifo(&hd->doctor_queue, DUMMY_ID, 16);
-      thread_create(&dthr[i], NULL, doctorThread, &idd[i]);
-   }
 }
 
 /* ************************************************* */
@@ -136,17 +118,6 @@ void term_simulation(int np)
    {
       cond_destroy(&hd->all_patients[i].p_ready);
       mutex_destroy(&hd->all_patients[i].access);
-      thread_join(pthr[i], NULL);
-   }
-   
-   for(int i = 0; i < nnurses; i++)
-   {
-      thread_join(nthr[i], NULL);
-   }
-
-   for(int i = 0; i < ndoctors; i++)
-   {
-      thread_join(dthr[i], NULL);
    }
 
    printf("Releasing resources\n");
@@ -338,6 +309,52 @@ int main(int argc, char *argv[])
    // TODO point: REPLACE THE FOLLOWING DUMMY CODE WITH code to launch
    // active entities and code to properly terminate the simulation.
    /* dummy code to show a very simple sequential behavior */
+
+   int idp[npatients];
+   int idn[nnurses];
+   int idd[ndoctors];
+   
+   for(int i = 0; i < npatients; i++)
+   {
+      idp[i] = i;
+      thread_create(&pthr[i], NULL, patientThread, &idp[i]);
+   }
+
+   for(int i = 0; i < nnurses; i++)
+   {
+      idn[i] = i;
+      insert_pfifo(&hd->triage_queue, DUMMY_ID, 16);
+      thread_create(&nthr[i], NULL, nurseThread, &idn[i]);
+   }
+
+   for(int i = 0; i < ndoctors; i++)
+   {
+      idd[i] = i;
+      thread_create(&dthr[i], NULL, doctorThread, &idd[i]);
+   }
+
+   
+   for(int i = 0; i < ndoctors; i++)
+   {
+      insert_pfifo(&hd->doctor_queue, DUMMY_ID, 16);
+   }
+   
+
+   for(int i = 0; i < npatients; i++)
+   {
+      thread_join(pthr[i], NULL);
+   }
+
+   for(int i = 0; i < nnurses; i++)
+   {
+      thread_join(nthr[i], NULL);
+   }
+
+   for(int i = 0; i < ndoctors; i++)
+   {
+      thread_join(dthr[i], NULL);
+   }
+
    
    //for(int i = 0; i < npatients; i++)
    //{
