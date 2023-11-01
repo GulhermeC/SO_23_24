@@ -102,7 +102,7 @@ void init_simulation(int np)
    for(int i = 0; i < npatients; i++)
    {
       mutex_init(&hd->all_patients[i].access, NULL);
-      cond_init(&hd->all_patients[i].p_ready,NULL);
+      cond_init(&hd->all_patients[i].p_ready, NULL);
    }
 
 }
