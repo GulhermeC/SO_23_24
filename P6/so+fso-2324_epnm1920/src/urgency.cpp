@@ -332,19 +332,7 @@ int main(int argc, char *argv[])
       idd[i] = i;
       thread_create(&dthr[i], NULL, doctorThread, &idd[i]);
    }
-
    
-   for(int i = 0; i < ndoctors; i++)
-   {
-      insert_pfifo(&hd->doctor_queue, DUMMY_ID, 16);
-   }
-   
-
-   for(int i = 0; i < npatients; i++)
-   {
-      thread_join(pthr[i], NULL);
-   }
-
    for(int i = 0; i < nnurses; i++)
    {
       thread_join(nthr[i], NULL);
@@ -352,8 +340,17 @@ int main(int argc, char *argv[])
 
    for(int i = 0; i < ndoctors; i++)
    {
+      insert_pfifo(&hd->doctor_queue, DUMMY_ID, 16);
       thread_join(dthr[i], NULL);
    }
+
+   for(int i = 0; i < npatients; i++)
+   {
+      thread_join(pthr[i], NULL);
+   }
+
+
+   
 
    
    //for(int i = 0; i < npatients; i++)
