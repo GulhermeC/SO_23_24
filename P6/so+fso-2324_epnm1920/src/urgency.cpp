@@ -158,7 +158,7 @@ int doctor_iteration(int id) // return value can be used to request termination
    check_valid_doctor(id);
    printf("\e[32;01mDoctor %d: get next patient\e[0m\n", id);
    int patient = retrieve_pfifo(&hd->doctor_queue);
-   
+   mutex_lock(&hd->all_patients[patient].access);
    // TODO point: PUT YOUR DOCTOR TERMINATION CODE HERE:
    if(patient==DUMMY_ID)
    {
@@ -169,7 +169,7 @@ int doctor_iteration(int id) // return value can be used to request termination
    random_wait();
    printf("\e[32;01mDoctor %d: patient %d treated\e[0m\n", id, patient);
    // TODO point: PUT YOUR PATIENT CONSULTATION FINISHED NOTIFICATION CODE HERE:
-   mutex_lock(&hd->all_patients[patient].access);
+   
    hd->all_patients[patient].done = 1;
    cond_broadcast(&hd->all_patients[patient].p_ready);
    mutex_unlock(&hd->all_patients[patient].access);
@@ -310,6 +310,14 @@ int main(int argc, char *argv[])
    // active entities and code to properly terminate the simulation.
    /* dummy code to show a very simple sequential behavior */
 
+   //for(int i = 0; i < npatients; i++)
+   //{
+   //   printf("\n");
+   //   random_wait(); // random wait for patience creation
+   //   patient_life(i);
+   //}
+   /* end of dummy code */
+
    int idp[npatients];
    int idn[nnurses];
    int idd[ndoctors];
@@ -348,18 +356,7 @@ int main(int argc, char *argv[])
    {
       thread_join(pthr[i], NULL);
    }
-
-
    
-
-   
-   //for(int i = 0; i < npatients; i++)
-   //{
-   //   printf("\n");
-   //   random_wait(); // random wait for patience creation
-   //   patient_life(i);
-   //}
-   /* end of dummy code */
    /* terminate simulation */
    term_simulation(npatients);
 
