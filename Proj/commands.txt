@@ -1,0 +1,12 @@
+# doc
+doxygen
+firefox html/index.html & 
+
+
+# Use binary functions (teachers' functions)
+./bin/main -b -i examples/p1a.txt
+./bin/main -b -i examples/p1a.txt -r 103-103
+./bin/main -b 
+
+
+./bin/main -h

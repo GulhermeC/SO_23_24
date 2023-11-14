@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/gjscraveiro/Desktop/Uni/SO/SO_23_24/Proj/somm23-grp/lib/libsup.a  CMakeFiles/sup.dir/exception.cpp.o CMakeFiles/sup.dir/probing.cpp.o CMakeFiles/sup.dir/binselection.cpp.o
+/usr/bin/ranlib /home/gjscraveiro/Desktop/Uni/SO/SO_23_24/Proj/somm23-grp/lib/libsup.a
